@@ -7,7 +7,7 @@ with open('README.md') as file:
     long_description = file.read()
 
 setup(name='deviceutils',
-      version='0.1.1',
+      version='0.1.2',
       description='Python Device Interaction Utilities',
       long_description=long_description,
       keywords='control communication device instrumentation lab laboratory manufacturing science',
