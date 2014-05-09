@@ -70,6 +70,7 @@ class Device(SharedResource, BasicDevice):
     def __init__(self, *args, uuid=None, name=None, make=None, model=None, version=None, **kwargs):
         SharedResource.__init__(self)
         BasicDevice.__init__(self, *args, **kwargs)
+        self._uuid = uuid
         self.name = name
         self.make = make
         self.model = model

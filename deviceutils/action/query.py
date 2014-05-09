@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 """
 """
-from copy import deepcopy
-
 from ..defaultencoding import DefaultEncoding
 from ..channel import channel
 

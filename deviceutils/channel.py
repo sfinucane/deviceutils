@@ -3,6 +3,7 @@
 """
 import contextlib
 
+
 @contextlib.contextmanager
 def channel(device_instance, io_):
     """Attach a stateful device instance to a file-like IO, and open in this context.

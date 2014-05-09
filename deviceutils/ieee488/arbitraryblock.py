@@ -13,7 +13,7 @@ class NeitherBlockNorDataError(ValueError):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.message += (
-            "(You need to provide either a binary block, or binary data!)" )
+            "(You need to provide either a binary block, or binary data!)")
 
 
 class ArbitraryBlock(object):
@@ -148,8 +148,8 @@ class DefiniteLengthBlock(ArbitraryBlock):
         data_begin = int(length_digits) + 2  # 2 for the '#' and digit count
         data_end = data_begin + int(data_length)
         # Slice the data from the block:
-        sData = slice(data_begin, data_end)
-        return sData
+        sdata = slice(data_begin, data_end)
+        return sdata
 
     # override
     def _create_block(self, data):

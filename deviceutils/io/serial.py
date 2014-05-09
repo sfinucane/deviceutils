@@ -32,10 +32,10 @@ class BasicSerialPort(serial.Serial):
             for port in serial.list_ports.comports():
                 yield port[0]    
     
-    def __init__(self, port, *args, timeout=30.0, **kwargs):
+    def __init__(self, port, timeout=30.0):
         """
         """
-        serial.Serial.__init__(self, port=None, *args, **kwargs)  # port=None prevents auto-open on init.
+        serial.Serial.__init__(self, port=None)  # port=None prevents auto-open on init.
         self.timeout = timeout
         self.port = port
     
