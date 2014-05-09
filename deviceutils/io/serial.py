@@ -3,7 +3,6 @@
 """
 import serial
 import os
-from .error import ResourceNotAvailableError
 
 from ..resource import SharedResource
 from .mixin import IORateLimiterMixin
@@ -47,7 +46,7 @@ class BasicSerialPort(serial.Serial):
             serial.Serial.open(self)
         
         if not isinstance(self.port, int) and self.port not in SerialPort.available_ports():
-            raise ResourceNotAvailableError("``{p}`` is not available!".format(p=self.port))
+            raise IOError("``{p}`` is not available!".format(p=self.port))
             
         serial.Serial.open(self)
     

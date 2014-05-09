@@ -1,19 +1,17 @@
 #!/usr/bin/env python
 """
 """
+from deviceutils.error import ProtocolError
 
-from .error import UnexpectedResponseFormatError
 
-
-class InvalidBlockFormatError(Exception):
+class InvalidBlockFormatError(ProtocolError):
     pass
 
 
-class NeitherBlockNorDataError(ValueError):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.message += (
-            "(You need to provide either a binary block, or binary data!)")
+class NeitherBlockNorDataError(Exception):
+    def __init__(self, message=''):
+        m = ''.join([message, '(You need to provide either a binary block, or binary data!)'])
+        Exception.__init__(self, m)
 
 
 class ArbitraryBlock(object):
@@ -63,7 +61,7 @@ class ArbitraryBlock(object):
             - The binary data, without the block header.
         """
         if block:
-            self.__block = deepcopy(block)
+            self.__block = block
             self.__data_slice = self._get_data_slice(self.__block)
         elif data:
             self.__block = self._create_block(data)
@@ -77,7 +75,7 @@ class ArbitraryBlock(object):
         return "<IEEE488_BINBLOCK>{0}</IEEE488_BINBLOCK>".format(repr(self.__block))
         
     def __getitem__(self, index):
-        return deepcopy(self.__block[index])
+        return self.__block[index]
     
     def _get_data_slice(self, block):
         """Slice the meaningful binary bytes (data) from the block.
@@ -222,7 +220,7 @@ def read_definite_length_block(raw_recv, block_id=None,
     # we are expecting an IEEE 488.2 Arbitrary Binary Block
     pound = raw_recv(1)
     if pound != b'#':
-        raise UnexpectedResponseFormatError(
+        raise ProtocolError(
             "Expected ``IEEE 488.2 Binary Block``! " +
             "Read: ``{0}``. ".format(pound) +
             "Remaining message data left in buffer.")
@@ -231,7 +229,7 @@ def read_definite_length_block(raw_recv, block_id=None,
     block_length = None
     if ndigits not in [b'1', b'2', b'3', b'4', 
                        b'5', b'6', b'7', b'8', b'9']:
-        raise UnexpectedResponseFormatError(
+        raise ProtocolError(
             "Expected ``IEEE 488.2 Binary Block``! " +
             "Read: ``{0}{1}``. ".format(pound, ndigits) +
             "Remaining message data left in buffer.")

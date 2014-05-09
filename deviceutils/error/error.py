@@ -9,8 +9,7 @@ class DeviceError(Exception):
     pass
 
 
-class DeviceNotFoundError(DeviceError):
+class ProtocolError(Exception):
     """
     """
     pass
-
