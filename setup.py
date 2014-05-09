@@ -3,7 +3,7 @@
 """
 from distutils.core import setup
 
-with open('README') as file:
+with open('README.md') as file:
     long_description = file.read()
 
 setup(name='deviceutils',
@@ -39,11 +39,10 @@ setup(name='deviceutils',
       zip_safe=False,
       platforms='any',
       provides=['deviceutils'],
-      data_files=[('', ['README', 'LICENSE', 'NOTICE'])],
+      data_files=[('', ['README.md', 'LICENSE', 'NOTICE'])],
       packages=['deviceutils',
                 'deviceutils.io',
                 'deviceutils.device',
                 'deviceutils.action',
-                'deviceutils.quantity',
                 'deviceutils.ieee488'],
       )
