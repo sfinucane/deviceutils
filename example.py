@@ -60,3 +60,10 @@ if __name__ == '__main__':
     query0 = Query('Hello World!', device=Device(timeout=3.0), io=TcpSocket(HOST, PORT))
     query0()
     print(query0.value)
+
+    import socket
+    sss = socket.socket()
+    sss.connect((HOST, PORT))
+    query0 = Query('Hello World!', device=Device(timeout=3.0), io=sss.makefile())
+    query0()
+    print(query0.value)
