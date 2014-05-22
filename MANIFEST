@@ -14,12 +14,9 @@ deviceutils\action\query.py
 deviceutils\action\response.py
 deviceutils\device\__init__.py
 deviceutils\device\device.py
-deviceutils\device\error.py
 deviceutils\ieee488\__init__.py
 deviceutils\ieee488\arbitraryblock.py
-deviceutils\ieee488\error.py
 deviceutils\io\__init__.py
-deviceutils\io\error.py
 deviceutils\io\mixin.py
 deviceutils\io\serial.py
 deviceutils\io\socket.py
