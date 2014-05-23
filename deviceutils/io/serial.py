@@ -4,7 +4,6 @@
 import serial
 import os
 
-from ..resource import SharedResource
 from .mixin import IORateLimiterMixin
 
 
@@ -58,9 +57,8 @@ class BasicSerialPort(serial.Serial):
     closed = property(is_closed)
 
 
-class SerialPort(SharedResource, IORateLimiterMixin, BasicSerialPort):
+class SerialPort(IORateLimiterMixin, BasicSerialPort):
     """
     """
     def __init__(self, *args, **kwargs):
-        SharedResource.__init__(self)
         BasicSerialPort.__init__(self, *args, **kwargs)

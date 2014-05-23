@@ -2,7 +2,7 @@
 """
 """
 from ..defaultencoding import DefaultEncoding
-from ..channel import channel
+from ..import channel
 
 
 class Response(object):
@@ -26,24 +26,9 @@ class Response(object):
     def __call__(self):
         """Performs a device read, using the currently set io, and stores the value.
         """
-        self.io.lock.acquire()
-        try:
-            self.device.lock.acquire()
-            
-            try:
-                if isinstance(self.encoding, DefaultEncoding):
-                    with channel(self.device, self.io) as dev:
-                        self.__response = dev.receive(self.receive_count)
-                else:
-                    with channel(self.device, self.io) as dev:
-                        self.__response = dev.receive(self.receive_count, encoding=self.encoding)
-            
-            except:
-                raise
-            finally:
-                self.device.lock.release()
-        
-        except:
-            raise
-        finally:
-            self.io.lock.release()
+        if isinstance(self.encoding, DefaultEncoding):
+            with channel(self.device, self.io) as dev:
+                self.__response = dev.receive(self.receive_count)
+        else:
+            with channel(self.device, self.io) as dev:
+                self.__response = dev.receive(self.receive_count, encoding=self.encoding)

@@ -3,6 +3,7 @@
 """
 import socketserver
 import threading
+import time
 
 from deviceutils import Device
 from deviceutils import SerialPort
@@ -17,6 +18,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         data = str(self.request.recv(1024), 'latin1')
         cur_thread = threading.current_thread()
         response = bytes("{}: {}".format(cur_thread.name, data), 'latin1')
+        time.sleep(4.0)
         self.request.sendall(response)
 
 
@@ -49,21 +51,17 @@ if __name__ == '__main__':
     #     print(dev.receive(encoding=None))
 
     # the ``channel`` method
-    with channel(Device(timeout=3.0), TcpSocket(HOST, PORT)) as dev:
-        print(dev.stdio.closed)
-        dev.send('Hello World!')
-        # TODO: fix the following bug
-        #print(dev.receive(32).strip())  # causes hang even with timeout set!
-        print(dev.receive().strip())
+    try:
+        with channel(Device(timeout=3.0), TcpSocket(HOST, PORT)) as dev:
+            print(dev.stdio.closed)
+            dev.send('Hello World!')
+            # TODO: fix the following bug
+            #print(dev.receive(32).strip())  # causes hang even with timeout set!
+            print(dev.receive().strip())
+    except Exception:
+        pass
 
     # the ``action`` method
-    query0 = Query('Hello World!', device=Device(timeout=3.0), io=TcpSocket(HOST, PORT))
+    query0 = Query('Hello World!', device=Device(timeout=None), io=TcpSocket(HOST, PORT))
     query0()
-    print(query0.value)
-
-    import socket
-    sss = socket.socket()
-    sss.connect((HOST, PORT))
-    query0 = Query('Hello World!', device=Device(timeout=3.0), io=sss.makefile())
-    query0()
-    print(query0.value)
+    print(query0.value.strip())

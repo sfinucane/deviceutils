@@ -2,9 +2,13 @@
 """
 """
 import time
-import select
+import multiprocessing
 
-from ..resource import SharedResource
+from ..error import DeviceTimeoutError
+
+
+def receive_proc(return_queue, io, count):
+    return_queue.put_nowait(io.read(count))
 
 
 class BasicDevice(object):
@@ -16,7 +20,7 @@ class BasicDevice(object):
     
     SEND_TERMINATION = '\n'
         
-    def __init__(self, timeout=30.0):
+    def __init__(self, timeout=None):
         object.__init__(self)
         self._stdio = None
         
@@ -36,20 +40,17 @@ class BasicDevice(object):
     def receive(self, count=DEFAULT_RECV_COUNT, encoding=DEFAULT_ENCODING):
         """
         """
-        received = bytearray()
-        start_time = time.time()
-        while True:
-            ready_read, ready_write, in_error = select.select([self.stdio], [], [], 0)
-            if self.stdio in ready_read:
-                chunk = self.stdio.read()
-                received.extend(chunk)
-                if len(received) >= count:
-                    break
-                else:
-                    start_time = time.time()
-            if (time.time() - start_time) > self.timeout:
-                break
-        
+        receive_queue = multiprocessing.Queue()
+        t_reader = multiprocessing.Process(target=receive_proc, args=(receive_queue, self.stdio, count))
+        t_reader.start()
+        t_reader.join(timeout=self.timeout)
+        if t_reader.is_alive():
+            # the read timed out!
+            t_reader.terminate()
+            t_reader.join()
+            raise DeviceTimeoutError('A timeout occurred while performing an device read.')
+
+        received = receive_queue.get_nowait()
         if encoding:
             return received.decode(encoding=encoding)
         else:
@@ -64,11 +65,10 @@ class BasicDevice(object):
         self._stdio = io
 
 
-class Device(SharedResource, BasicDevice):
+class Device(BasicDevice):
     """
     """
     def __init__(self, *args, uuid=None, name=None, make=None, model=None, version=None, **kwargs):
-        SharedResource.__init__(self)
         BasicDevice.__init__(self, *args, **kwargs)
         self._uuid = uuid
         self.name = name
