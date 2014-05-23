@@ -3,8 +3,10 @@
 """
 import time
 import multiprocessing
+from collections import defaultdict
 
 from ..error import DeviceTimeoutError
+from ..dictattraccessor import DictAttrAccessor
 
 
 def receive_proc(return_queue, io, count):
@@ -18,7 +20,6 @@ def receive_proc(return_queue, io, count):
 class Device(object):
     """
     """
-
     DEFAULT_ENCODING = 'ascii'
     DEFAULT_RECV_COUNT = -1
     
@@ -34,6 +35,8 @@ class Device(object):
         self.make = make
         self.model = model
         self.version = version
+
+        self.state = DictAttrAccessor(dict_=defaultdict(type(None)))
         
     def send(self, message, encoding=DEFAULT_ENCODING):
         """

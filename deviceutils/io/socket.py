@@ -10,7 +10,10 @@ from deviceutils.error import IOTimeoutError
 
 
 def receive_proc(return_queue, sock, count):
-    return_queue.put_nowait(sock.recv(count))
+    try:
+        return_queue.put_nowait(sock.recv(count))
+    except Exception as e:
+        return_queue.put_nowait(e)
 
 
 class BasicTcpSocket(io.IOBase):
@@ -59,6 +62,8 @@ class BasicTcpSocket(io.IOBase):
             p_reader.join()
             raise IOTimeoutError('i/o timed out during read.')
         received = receive_queue.get_nowait()
+        if isinstance(received, Exception):
+            raise received
         return bytes(received)
 
     def writable(self):
