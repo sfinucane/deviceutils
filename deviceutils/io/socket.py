@@ -3,28 +3,39 @@
 """
 import socket
 import io
+import multiprocessing
 
 from .mixin import IORateLimiterMixin
+from deviceutils.error import IOTimeoutError
 
 
-class BasicTcpSocket(object):
+def receive_proc(return_queue, sock, count):
+    return_queue.put_nowait(sock.recv(count))
+
+
+class BasicTcpSocket(io.IOBase):
     """
     """
-    def __init__(self, host, port, timeout=30.0, buffer_size=4096):
+    def __init__(self, host, port, timeout=None, buffer_size=4096):
+        super().__init__()
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host = host
         self.port = port
         self.timeout = timeout
-        self.closed = True
-        self.buffer_size = buffer_size
+        self._closed = True
+        self.read_buffer_size = buffer_size
     
     def close(self):
         self._socket.shutdown(socket.SHUT_RDWR)
         self._socket.close()
         # re-instantiate so that the socket can be used again.
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.closed = True
-        
+        self._closed = True
+
+    @property
+    def closed(self):
+        return self._closed
+
     def fileno(self):
         return self._socket.fileno(self)
         
@@ -32,28 +43,33 @@ class BasicTcpSocket(object):
         pass
     
     def readable(self):
-        return not self.closed
+        return not self._closed
         
-    def read(self, size=-1):
-        try:
-            if not size or size < 0:
-                return self._socket.recv(self.buffer_size)
-            else:
-                return self._socket.recv(size)
-        except socket.timeout:
-            return bytes([])
-        except:
-            raise
-        
+    def read(self, size=None):
+        if not size or size < 0:
+            size = self.read_buffer_size
+
+        receive_queue = multiprocessing.Queue()
+        p_reader = multiprocessing.Process(target=receive_proc, args=(receive_queue, self._socket, size))
+        p_reader.start()
+        p_reader.join(timeout=self.timeout)
+        if p_reader.is_alive():
+            # the receive has timed out!
+            p_reader.terminate()
+            p_reader.join()
+            raise IOTimeoutError('i/o timed out during read.')
+        received = receive_queue.get_nowait()
+        return bytes(received)
+
     def writable(self):
-        return not self.closed
+        return not self._closed
         
     def write(self, b):
         return self._socket.send(b)
         
     def open(self):
         self._socket.connect((self.host, self.port))
-        self.closed = False
+        self._closed = False
         
 
 class TcpSocket(IORateLimiterMixin, BasicTcpSocket):

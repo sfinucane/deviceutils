@@ -10,6 +10,8 @@ from deviceutils import SerialPort
 from deviceutils import TcpSocket
 from deviceutils import channel
 from deviceutils import Query
+from deviceutils.error import DeviceTimeoutError
+from deviceutils.error import IOTimeoutError
 
 
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
@@ -39,16 +41,7 @@ if __name__ == '__main__':
     server_thread.start()
     print("Server loop running in thread:", server_thread.name)
 
-    # with channel(Device(), SerialPort(serial_port, timeout=6.0)) as dev:
-    #     print(dev.stdio.closed)
-    #     print(dev.stdio.io_min_delta)
-    #     dev.stdio.io_min_delta = 3.0
-    #     dev.send('Hello')
-    #     print('Wrote ``Hello``.')
-    #     dev.send('World!')
-    #     print('Wrote ``World!``.')
-    #     print('Attempting a read...')
-    #     print(dev.receive(encoding=None))
+    print('Available serial ports:', list(SerialPort.available_ports()))
 
     # the ``channel`` method
     try:
@@ -58,10 +51,27 @@ if __name__ == '__main__':
             # TODO: fix the following bug
             #print(dev.receive(32).strip())  # causes hang even with timeout set!
             print(dev.receive().strip())
-    except Exception:
-        pass
+    except DeviceTimeoutError as e:
+        print(e)
+    except IOTimeoutError as e:
+        print(e)
 
     # the ``action`` method
-    query0 = Query('Hello World!', device=Device(timeout=None), io=TcpSocket(HOST, PORT))
-    query0()
-    print(query0.value.strip())
+    try:
+        query0 = Query('Hello World!', device=Device(timeout=None), io=TcpSocket(HOST, PORT))
+        query0()
+        print(query0.value.strip())
+    except DeviceTimeoutError as e:
+        print(e)
+    except IOTimeoutError as e:
+        print(e)
+
+    # the ``action`` method, with both IO and Device timeouts set
+    try:
+        query0 = Query('Hello World!', device=Device(timeout=None), io=TcpSocket(HOST, PORT, timeout=1.0))
+        query0()
+        print(query0.value.strip())
+    except DeviceTimeoutError as e:
+        print(e)
+    except IOTimeoutError as e:
+        print(e)

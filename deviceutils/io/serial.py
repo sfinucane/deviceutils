@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 """
 """
-import serial
 import os
+import io
+
+import serial  # third-party
 
 from .mixin import IORateLimiterMixin
 
 
-class BasicSerialPort(serial.Serial):
+class BasicSerialPort(io.IOBase):
     """A basic serial port file-like IO class.
     """
-    
     @staticmethod
     def available_ports():
         """
@@ -30,10 +31,11 @@ class BasicSerialPort(serial.Serial):
             for port in serial.list_ports.comports():
                 yield port[0]    
     
-    def __init__(self, port, timeout=30.0):
+    def __init__(self, port, timeout=None):
         """
         """
-        serial.Serial.__init__(self, port=None)  # port=None prevents auto-open on init.
+        super().__init__()
+        self._serial = serial.Serial(self, port=None)  # port=None prevents auto-open on init.
         self.timeout = timeout
         self.port = port
     
@@ -50,7 +52,7 @@ class BasicSerialPort(serial.Serial):
         serial.Serial.open(self)
     
     def is_closed(self):
-        """Avoid using this interface. Read SerialPort.closed instead.
+        """Avoid using this interface. Read SerialPort._closed instead.
         """
         return not self.isOpen()
         

@@ -8,10 +8,14 @@ from ..error import DeviceTimeoutError
 
 
 def receive_proc(return_queue, io, count):
-    return_queue.put_nowait(io.read(count))
+    # the return queue should never be empty after execution!
+    try:
+        return_queue.put_nowait(io.read(count))
+    except Exception as e:
+        return_queue.put_nowait(e)
 
 
-class BasicDevice(object):
+class Device(object):
     """
     """
 
@@ -20,11 +24,16 @@ class BasicDevice(object):
     
     SEND_TERMINATION = '\n'
         
-    def __init__(self, timeout=None):
+    def __init__(self, uuid=None, name=None, make=None, model=None, version=None, timeout=None):
         object.__init__(self)
         self._stdio = None
-        
         self.timeout = timeout
+
+        self._uuid = uuid
+        self.name = name
+        self.make = make
+        self.model = model
+        self.version = version
         
     def send(self, message, encoding=DEFAULT_ENCODING):
         """
@@ -48,9 +57,16 @@ class BasicDevice(object):
             # the read timed out!
             t_reader.terminate()
             t_reader.join()
-            raise DeviceTimeoutError('A timeout occurred while performing an device read.')
+            raise DeviceTimeoutError(uuid=self._uuid,
+                                     name=self.name,
+                                     make=self.make,
+                                     model=self.model,
+                                     version=self.version,
+                                     message='device timed out during receive.')
 
         received = receive_queue.get_nowait()
+        if isinstance(received, Exception):
+            raise received
         if encoding:
             return received.decode(encoding=encoding)
         else:
@@ -63,15 +79,3 @@ class BasicDevice(object):
     @stdio.setter
     def stdio(self, io):
         self._stdio = io
-
-
-class Device(BasicDevice):
-    """
-    """
-    def __init__(self, *args, uuid=None, name=None, make=None, model=None, version=None, **kwargs):
-        BasicDevice.__init__(self, *args, **kwargs)
-        self._uuid = uuid
-        self.name = name
-        self.make = make
-        self.model = model
-        self.version = version
