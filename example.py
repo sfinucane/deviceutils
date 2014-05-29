@@ -1,7 +1,35 @@
 #!/usr/bin/env python
 """
 """
-import socketserver
+# Python 2.6 and newer support
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
+from future.builtins import (
+                bytes, dict, int, list, object, range, str,
+                ascii, chr, hex, input, next, oct, open,
+                pow, round, super,
+                filter, map, zip)
+try:
+    unicode()
+except NameError:
+    unicode = str
+
+import sys
+__python_version__ = dict()
+try:
+    __python_version__['major'] = sys.version_info.major
+except AttributeError:
+    __python_version__['major'] = sys.version_info[0]
+try:
+    __python_version__['minor'] = sys.version_info.minor
+except AttributeError:
+    __python_version__['minor'] = sys.version_info[1]
+
+try:
+    import socketserver  # Python 3.x
+except ImportError:
+    import SocketServer as socketserver  # Python 2.x
+
 import threading
 import time
 
@@ -50,8 +78,7 @@ if __name__ == '__main__':
         with channel(dev0, TcpSocket(HOST, PORT)) as dev:
             print(dev.stdio.closed)
             dev.send('Hello World!')
-            # TODO: fix the following bug
-            dev.state.first_received = dev.receive(32).strip()  # causes hang even with timeout set!
+            dev.state.first_received = dev.receive(32).strip()
             #print(dev.receive().strip())
             print(dev.state.first_received)
     except DeviceTimeoutError as e:
