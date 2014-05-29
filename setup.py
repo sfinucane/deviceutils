@@ -26,7 +26,7 @@ if (__python_version__['major'], __python_version__['minor']) in [(2, 6)]:
 
 
 setup(name='deviceutils',
-      version='0.1.3',
+      version='0.1.4',
       description='Python Device Interaction Utilities',
       long_description=long_description,
       keywords='control communication device instrumentation lab laboratory manufacturing science',
