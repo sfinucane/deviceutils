@@ -76,6 +76,7 @@ class Device(object):
     def receive(self, count=DEFAULT_RECV_COUNT, encoding=DEFAULT_ENCODING):
         """
         """
+        # TODO: multiprocess approach will pickle io objects... The goal is to use a Manager instead in final implementation.
         receive_queue = multiprocessing.Queue()
         t_reader = multiprocessing.Process(target=receive_proc, args=(receive_queue, self.stdio, count))
         t_reader.start()

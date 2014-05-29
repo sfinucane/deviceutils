@@ -40,6 +40,7 @@ def receive_proc(return_queue, sock, count):
         return_queue.put_nowait(e)
 
 
+# TODO: multiprocess approach will pickle io objects... The goal is to use a Manager instead in final implementation.
 class BasicTcpSocket(io.IOBase):
     """
     """
