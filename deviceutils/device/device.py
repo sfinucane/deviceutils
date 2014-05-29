@@ -77,7 +77,6 @@ class Device(object):
         """
         """
         receive_queue = multiprocessing.Queue()
-        print(self.stdio._socket)
         t_reader = multiprocessing.Process(target=receive_proc, args=(receive_queue, self.stdio, count))
         t_reader.start()
         t_reader.join(timeout=self.timeout)

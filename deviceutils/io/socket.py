@@ -127,17 +127,17 @@ class BasicTcpSocket(io.IOBase):
     def _unmarshal(self):
         self._just_marshaled = False
 
-    def __getstate__(self):
+    #def __getstate__(self):
         # handle a pickle while opened!
-        state = super().__getstate__()
-        if not self.closed:
-            state['_socket'] = None
-        return state
+        #state = super().__getstate__()
+        #if not self.closed:
+            #state['_socket'] = None
+        #return state
 
 
-    def __setstate__(self, state):
+    #def __setstate__(self, state):
         # reinstate self, and handle an unpickle of an object that was pickled while open!
-
+        #pass
         
 
 class TcpSocket(IORateLimiterMixin, BasicTcpSocket):
